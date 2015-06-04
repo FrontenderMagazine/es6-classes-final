@@ -1,9 +1,9 @@
 [Недавно][1], TC39 решили окончательно стандартизировать семантику классов в 
-ECMAScript 6[2]. Это статья поясняет, как работает их окончательная реализация.
-Наиболее значимыми из недавних изменений были связаны с тем, как реализована 
-система подклассов.
+ECMAScript 6[2]. Это статья поясняет, как работает их окончательная 
+реализация. Наиболее значимыми из недавних изменений были связаны с тем, как 
+реализована система наследования классов.
 
- ### 1. Обзор {#overview}
+### 1. Обзор {#overview}
 
     class Point {
         constructor(x, y) {
@@ -36,7 +36,7 @@ ECMAScript 6[2]. Это статья поясняет, как работает �
 
 #### 2.1 Базовые классы {#base_classes}
 
-Классы определяются в ECMAScript 6 (ES6) как:
+Классы определяются в ECMAScript 6 (ES6) следующим образом:
 
     class Point {
         constructor(x, y) {
@@ -52,412 +52,392 @@ ECMAScript 6[2]. Это статья поясняет, как работает �
 
     > var p = new Point(25, 8);
     > p.toString()
-    **'(25, 8)'**
+    '(25, 8)'
     
 По факту, результатом создания такого класса будет функция:
 
     > typeof Point
-    **'function'**
+    'function'
     
-Однако, вы можете вызывать класс через только через ```new```, а не через 
+Однако, вы можете вызывать класс только через ```new```, а не через 
 функцию call([Секция 9.2.2][2] в спецификации):
 
     > Point()
-    **TypeError: Classes can’t be function-called**
+    TypeError: Classes can’t be function-called
     
 
-##### Class declarations are not hoisted {#class_declarations_are_not_hoisted}
+##### Объявления классов не поднимаются {#class_declarations_are_not_hoisted}
 
-Function declarations are *hoisted*: When entering a scope, the functions that
-are declared in it are immediately available – independently of where the 
-declarations happen. That means that you can call a function that is declared 
-later:
+Объявления функций осуществляется через механизм _поднятия_: объявленные 
+внутри общей область видимости функции сразу же доступны - независимо от 
+того, где они были объявлены. Это означает, что вы можете вызвать функцию, 
+которая была объявлена позднее.
 
     foo(); // works, because `foo` is hoisted
-        
-        function foo() {}
     
-
-In contrast, class declarations are not hoisted. Therefore, a class only exists
-after execution reached its definition and it was evaluated. Accessing it 
-beforehand leads to a`ReferenceError`:
+    function foo() {}
+    
+С другой стороны, само определение классов не является _поднятием_.
+Таким образом, класс существует только после того, как его определение было 
+достигнуто и выполнено. Попытка создания класса до этого момента 
+приведет к _ReferenceError_:
 
     new Foo(); // ReferenceError
-        
-        class Foo {}
+
+    class Foo {}
     
+Причина этого ограничения в том, что классы могут иметь ключевое слово_extends_,
+значение которого, может быть произвольным выражением. Это выражение должно
+находится в определенном месте, которое не может быть _поднято_.
 
-The reason for this limitation is that classes can have an `extends` clause
-whose value is an arbitrary expression. That expression must be evaluated in the
-proper “location”, its evaluation can’t be hoisted.
-
-Not having hoisting is less limiting than you may think. For example, a
-function that comes before a class declaration can still refer to that class, 
-but you have to wait until the class declaration has been evaluated before you 
-can call the function.
+Отсутствие механизма _поднятия_ - это меньшее ограничение, чем вы могли бы 
+подумать. Например, функция, которая определена до определения класса, все еще 
+может ссылаться на этот класс, но вы вынуждены ждать выполнения определения 
+класса до того, как сможете выполнить эту функцию.
 
     function functionThatUsesBar() {
-            new Bar();
-        }
-        
-        functionThatUsesBar(); // ReferenceError
-        class Bar {}
-        functionThatUsesBar(); // OK
-    
+        new Bar();
+    }
 
-##### Class expressions {#class_expressions}
+    functionThatUsesBar(); // ReferenceError
+    class Bar {}
+    functionThatUsesBar(); // OK
 
-Similarly to functions, there are two kinds of *class definitions*, two ways to
-define a class:*class declarations* and *class expressions*.
 
-Also similarly to functions, the identifier of a class expression is only
-visible within the expression:
+##### Выражения класса {#class_expressions}
+
+Аналогично функциям, есть два вида _определения классов_, два способа 
+определить класс: _класс объявлений_ и _класс выражений_.
+
+По аналогии с функциями, идентификатор выражения класса доступен только 
+внутри выражения:
 
     const MyClass = class Me {
-            getClassName() {
-                return Me.name;
-            }
-        };
-        let inst = new MyClass();
-        console.log(inst.getClassName()); // Me
-        console.log(Me.name); // ReferenceError: Me is not defined
+        getClassName() {
+            return Me.name;
+        }
+    };
+    let inst = new MyClass();
+    console.log(inst.getClassName()); // Me
+    console.log(Me.name); // ReferenceError: Me is not defined
     
 
-#### Inside the body of a class definition {#
-inside_the_body_of_a_class_definition
-}
+#### 2.2 Внутри определения тела класса {#inside_the_body_of_a_class_definition}
 
-A class body can only contain methods, but not data properties. Prototypes
-having data properties is generally considered an anti-pattern, so this just 
-enforces a best practice.
+Тело класса может содержать только методы, но не свойства данных. 
+Прототип, имеющий свойства данных обычно считается анти-паттерном.
 
-##### `constructor`, static methods, prototype methods {#
-constructor_static_methods_prototype_methods
-}
+##### _constructor_, статические методы, прототипные методы {#constructor_static_methods_prototype_methods}
 
-Let’s examine three kinds of methods that you often find in class literals.
+Давайте рассмотрим три вида методов, которые вы часто найти в литералах класса.
 
     class Foo {
-            constructor(prop) {
-                this.prop = prop;
-            }
-            static staticMethod() {
-                return 'classy';
-            }
-            prototypeMethod() {
-                return 'prototypical';
-            }
+        constructor(prop) {
+            this.prop = prop;
         }
-        let foo = new Foo(123);
+        static staticMethod() {
+            return 'classy';
+        }
+        prototypeMethod() {
+            return 'prototypical';
+        }
+    }
+    let foo = new Foo(123);
     
+Диаграмма объекта для это определения класса выглядит следующим образом.
+Совет для понимания:_[[Prototype]]_ это отношения наследования между объектами,
+в то время как _prototype_  это обычное свойство, значением которого является
+объект. _prototype_ это специальное свойство, значение которого оператор _new_
+использует как прототип для создаваемых объектов.
 
-The object diagram for this class declaration looks as follows. Tip for
-understanding it:`[[Prototype]]` is an inheritance relationship between objects
-, while`prototype` is a normal property whose value is an object. The property
-`prototype` is only special because the `new` operator uses its value as the
-prototype for instances it creates.
+![][3]
 
-![][3] 
-
-**First, the pseudo-method `constructor`.** This method is special, as it
-defines the function that represents the class:
+**Во первых, псевдо-метод _constructor_.** Этот метод является особенным, так как 
+он определяет функцию, которая представляет собой класс:
 
     > Foo === Foo.prototype.constructor
-        true
-        > typeof Foo
-        'function'
-    
+    true
+    > typeof Foo
+    'function'
 
-It is sometimes called a `class constructor`. It has features that normal
-constructor functions don’t have (mainly the ability to constructor-call its 
-super-constructor via`super()`, which is explained later).
+Иногда его называют _конструктор класса_. Он имеет особенности которые обычный 
+конструктор функции не имеет (главным образом способность констраутора вызывать
+супер-конструктор через _super()_, о котором я расскажу чуть позже).
 
-**Second, static methods.** *Static properties* (or *class properties*) are
-properties of`Foo` itself. If you prefix a method definition with `static`, you
-create a class method:
+**Во вторых, статические методы.** _Статичесие свойства_ (или _свойства класса)
+являются свойствами самого _Foo_. Если вы определили метод с помощью _static_,
+значит вы создали метод класса:
 
     > typeof Foo.staticMethod
-        'function'
-        > Foo.staticMethod()
-        'classy'
+    'function'
+    > Foo.staticMethod()
+    'classy'
     
 
-**Third, prototype methods.** The *prototype properties* of `Foo` are the
-properties of`Foo.prototype`. They are usually methods and inherited by
-instances of`Foo`.
+**В третьих, прототипные методы.** _свойства прототипа_ _Foo_ являются и 
+свойствами _Foo.prototype_. Как правило это методы наследованные от 
+экземпляра _Foo_.
 
     > typeof Foo.prototype.prototypeMethod
-        'function'
-        > foo.prototypeMethod()
-        'prototypical'
+    'function'
+    > foo.prototypeMethod()
+    'prototypical'
     
 
-##### Getters and setters {#getters_and_setters}
+##### Get'еры и Set'еры {#getters_and_setters}
 
-The syntax for getters and setters is just like 
+Синтаксис для get'еров и set'еров такой же как и в 
 [in ECMAScript 5 object literals][4]:
 
     class MyClass {
-            get prop() {
-                return 'getter';
-            }
-            set prop(value) {
-                console.log('setter: '+value);
-            }
+        get prop() {
+            return 'getter';
         }
-    
+        set prop(value) {
+            console.log('setter: '+value);
+        }
+    }
 
-You use `MyClass` as follows.
+Вы используете _MyClass_ следующим способом:
 
     > let inst = new MyClass();
-        > inst.prop = 123;
-        setter: 123
-        > inst.prop
-        'getter'
+    > inst.prop = 123;
+    setter: 123
+    > inst.prop
+    'getter'
     
 
-##### Computed method names {#computed_method_names}
+##### Вычисляемые имена методов {#computed_method_names}
 
-You can define the name of a method via an expression, if you put it in square
-brackets. For example, the following ways of defining`Foo` are all equivalent
-.
+Вы можете определить имя метода с помощью выражения, если вы поместите его 
+в квадратные скобки. Например, следующие определения класса _Foo_ 
+эквивалентны:
 
     class Foo() {
-            myMethod() {}
-        }
-        
-        class Foo() {
-            ['my'+'Method']() {}
-        }
-        
-        const m = 'myMethod';
-        class Foo() {
-            [m]() {}
-        }
+        myMethod() {}
+    }
     
+    class Foo() {
+        ['my'+'Method']() {}
+    }
+    
+    const m = 'myMethod';
+    class Foo() {
+        [m]() {}
+    }
 
-Several special methods in ECMAScript 6 have keys that are symbols [3].
-Computed method names allow you to define such methods. For example, if an 
-object has a method whose key is`Symbol.iterator`, it is *iterable* [4]. That
-means that its contents can be iterated over by the`for-of` loop and other
-language mechanisms.
+Некоторые особенные методы в ECMAScript 6 это ключи, которые являются
+символами [3].
+Механизм вычисляемых имен методов позволяют вам определять такие методы. 
+Например, если объект имеет метод с ключом _Symbol.iterator_, это - 
+_итератор_ [4]. Это означает, что его содержимое может быть итерировано 
+циклом _for-of_ или другими механизмами языка.
 
     class IterableClass {
-            [Symbol.iterator]() {
-                ···
-            }
+        [Symbol.iterator]() {
+            ···
         }
+    }
     
 
-##### Generator methods {#generator_methods}
+##### Генераторы {#generator_methods}
 
-If you prefix a method definition with an asterisk (`*`), it becomes a *
-generator method* [4]. Among other things, a generator is useful for defining
-the method whose key is`Symbol.iterator`. The following code demonstrates how
-that works.
+Если вы определите метод с (_*_) в начале, то получите _метод генератор_ [4].
+В частности, генератор полезен для определения метода, ключом котороого 
+является _Symbol.iterator_. Следующий код демонстрирует как это работает:
 
     class IterableArguments {
-            constructor(...args) {
-                this.args = args;
-            }
-            * [Symbol.iterator]() {
-                for (let arg of this.args) {
-                    yield arg;
-                }
+        constructor(...args) {
+            this.args = args;
+        }
+        * [Symbol.iterator]() {
+            for (let arg of this.args) {
+                yield arg;
             }
         }
-        
-        for (let x of new IterableArguments('hello', 'world')) {
-            console.log(x);
-        }
-        
-        // Output:
-        // hello
-        // world
+    }
     
+    for (let x of new IterableArguments('hello', 'world')) {
+        console.log(x);
+    }
+    
+    // Output:
+    // hello
+    // world
+    
+#### 2.3 Классы наследники {#subclassing}
 
-The `extends` clause lets you create a subclass of an existing constructor (
-which may or may not have been defined via a class
-):
+Ключевое слово _extends_ позволяет создать класс-наследник существующего конструктора 
+(который был или, возможно, не был определен с помощью класса):
 
     class Point {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-            }
-            toString() {
-                return '(' + this.x + ', ' + this.y + ')';
-            }
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
         }
-        
-        class ColorPoint extends Point {
-            constructor(x, y, color) {
-                super(x, y); // (A)
-                this.color = color;
-            }
-            toString() {
-                return super.toString() + ' in ' + this.color; // (B)
-            }
+        toString() {
+            return '(' + this.x + ', ' + this.y + ')';
         }
+    }
     
-
-Again, this class is used like you’d expect:
+    class ColorPoint extends Point {
+        constructor(x, y, color) {
+            super(x, y); // (A)
+            this.color = color;
+        }
+        toString() {
+            return super.toString() + ' in ' + this.color; // (B)
+        }
+    }
+    
+Этот класс используется как и ожидалось:
 
     > let cp = new ColorPoint(25, 8, 'green');
-        > cp.toString()
-        '(25, 8) in green'
-        
-        > cp instanceof ColorPoint
-        true
-        > cp instanceof Point
-        true
+    > cp.toString()
+    '(25, 8) in green'
+    
+    > cp instanceof ColorPoint
+    true
+    > cp instanceof Point
+    true
     
 
-There are two kinds of classes:
+В данном случае мы имеем два вида классов:
 
-*   `Point` is a *base class*, because it doesn’t have an `extends` clause.
-*   `ColorPoint` is a *derived class*.
+*   _Point_ - это _базовый класс_, потому что он не имеет ключевого слова _extends_.
+*   _ColorPoint_ - _производный класс_.
 
-There are two ways of using `super`:
+Есть два способа использовать ключевое слово _super_:
 
-*   A *class constructor* (the pseudo-method `constructor` in a class literal)
-    uses it like a function call
-    (`super(···)`), in order to make a super-constructor call (line A).
+*   _Конструктор класса_ (псевдо-метод _constructor_ в теле класса)
+    использует его как вызов функции (_super(···)_), для того чтобы  
+    вызвать базовый конструктор (строка A).
 *   Method definitions (in object literals or classes, with or without `static`
    `super.prop`) or method calls (`super.method(···)`), in order to refer to
-    super-properties (line B
-    ).
+    super-properties (строка B).
 
-The prototype of a subclass is the superclass in ECMAScript 6:
+##### Прототип класса наследника является базовым классом {#the_prototype_of_a_subclass_is_the_superclass}
+
+Прототип класса наследника является базовым классом в ECMAScript 6:
 
     > Object.getPrototypeOf(ColorPoint) === Point
-        true
+    true
     
-
-That means that static properties are inherited:
+Это означает, что статические свойства наследуются:
 
     class Foo {
-            static classMethod() {
-                return 'hello';
-            }
+        static classMethod() {
+            return 'hello';
         }
-        
-        class Bar extends Foo {
-        }
-        Bar.classMethod(); // 'hello'
+    }
     
-
-You can even super-call static methods:
+    class Bar extends Foo {
+    }
+    Bar.classMethod(); // 'hello'
+    
+Можно вызывать статические методы базового класса:
 
     class Foo {
-            static classMethod() {
-                return 'hello';
-            }
+        static classMethod() {
+            return 'hello';
         }
-        
-        class Bar extends Foo {
-            static classMethod() {
-                return super.classMethod() + ', too';
-            }
+    }
+    
+    class Bar extends Foo {
+        static classMethod() {
+            return super.classMethod() + ', too';
         }
-        Bar.classMethod(); // 'hello, too'
+    }
+    Bar.classMethod(); // 'hello, too'
     
 
-##### Super-constructor calls {#super-constructor_calls}
+##### Вызов базового конструктора {#super-constructor_calls}
 
-In a derived class, you must call `super()` before you can use `this`:
+В классе наследнике нужно вызвать _super()_ до того как будете обращаться к 
+свойствам через _this_:
 
     class Foo {}
-        
-        class Bar extends Foo {
-            constructor(num) {
-                let tmp = num * 2; // OK
-                this.num = num; // ReferenceError
-                super();
-                this.num = num; // OK
-            }
-        }
     
+    class Bar extends Foo {
+        constructor(num) {
+            let tmp = num * 2; // OK
+            this.num = num; // ReferenceError
+            super();
+            this.num = num; // OK
+        }
+    }
 
-Implicitly leaving a derived constructor without calling `super()` also causes
-an error:
+Не вызвав `super()` в производном классе так же приведет к ошибке:
 
     class Foo {}
-        
-        class Bar extends Foo {
-            constructor() {
-            }
+    
+    class Bar extends Foo {
+        constructor() {
         }
-        
-        let bar = new Bar(); // ReferenceError
+    }
+    
+    let bar = new Bar(); // ReferenceError
     
 
-##### Overriding the result of a constructor {#
-overriding_the_result_of_a_constructor
-}
+##### Переопределение результата конструктора {#overriding_the_result_of_a_constructor}
 
-Just like in ES5, you can override the result of a constructor by explicitly
-returning an object:
+Так же, как в ES5, можно переопределить результат конструктора, явно возвращая 
+объект:
 
     class Foo {
-            constructor() {
-                return Object.create(null);
-            }
+        constructor() {
+            return Object.create(null);
         }
-        console.log(new Foo() instanceof Foo); // false
-    
+    }
+    console.log(new Foo() instanceof Foo); // false
 
-If you do so, it doesn’t matter whether `this` has been initialized or not. In
-other words: you don’t have to call`super()` in a derived constructor if you
-override the result in this manner.
+Если вы сделаете так, то не имеет значения, инициализирован ли _this_ или нет.
+Другими словами: вы не должны  вызывать _super()_ в производном конструкторе, 
+если переопределить результат таким образом.
 
-##### Default constructors for classes {#default_constructors_for_classes}
+##### Конструкторы по умолчанию для классов {#default_constructors_for_classes}
 
-If you don’t specify a `constructor` for a base class, the following definition
-is used:
+Если вы не указываете _constructor_  для базового класса, тогда испольузется
+слудающая конструкция:
 
     constructor() {}
-    
 
-For derived classes, the following default constructor is used:
+Для дочерних классов, используется конструктор по умолчанию:
 
     constructor(...args) {
-            super(...args);
-        }
-    
+        super(...args);
+    }
 
-In ECMAScript 6, you can finally subclass all built-in constructors (there are
-[work-arounds for ES5][5], but these have significant limitations).
+В ECMAScript 6, вы наконец-то можете наследоваться от всех встроенных 
+конструкторов ([обходные пути в ES5][5], но здесь етсь значительные ограничения).
 
-For example, you can now create your own exception classes (that will inherit
-the feature of having a stack trace in most engines
-):
+Например, теперь вы можете создавать свои собственные классы исключений 
+(которые будут наследовать особенности, имеющие стек в большинстве движков):
 
     class MyError extends Error {    
-        }
-        throw new MyError('Something happened!');
-    
+    }
+    throw new MyError('Something happened!');
 
-You can also create subclasses of `Array` whose instances properly handle 
-`length`:
+Вы также можете наследоваться от _Array_, экзмепляры которого правильно работают 
+с _length_:
 
     class MyArray extends Array {
-            constructor(len) {
-                super(len);
-            }
+        constructor(len) {
+            super(len);
         }
-        
-        // Instances of of `MyArray` work like real arrays:
-        let myArr = new MyArray(0);
-        console.log(myArr.length); // 0
-        myArr[0] = 'foo';
-        console.log(myArr.length); // 1
+    }
     
+    // Instances of of `MyArray` work like real arrays:
+    let myArr = new MyArray(0);
+    console.log(myArr.length); // 0
+    myArr[0] = 'foo';
+    console.log(myArr.length); // 1
 
-Note that subclassing built-in constructors is something that engines have to
-support natively, you won’t get this feature via transpilers.
+Заметьте, что наследование от встроенных конструкторов это то, что движок 
+должен поддерживать изначально, вы не сможете получить эту функциональность 
+через транспайлеры.
 
-### The details of classes {#the_details_of_classes}
+### 3. The details of classes {#the_details_of_classes}
 
 What we have seen so far are the essentials of classes. You only need to read
 on if you are interested how things happen under the hood. Let’s start with the 
@@ -465,36 +445,36 @@ syntax of classes. The following is a slightly modified version of the syntax
 shown in[Sect. A.4 of the ECMAScript 6 specification][6].
 
     ClassDeclaration:
-            "class" BindingIdentifier ClassTail
-        ClassExpression:
-            "class" BindingIdentifier? ClassTail
-        
-        ClassTail:
-            ClassHeritage? "{" ClassBody? "}"
-        ClassHeritage:
-            "extends" AssignmentExpression
-        ClassBody:
-            ClassElement+
-        ClassElement:
-            MethodDefinition
-            "static" MethodDefinition
-            ";"
-        
-        MethodDefinition:
-            PropName "(" FormalParams ")" "{" FuncBody "}"
-            "*" PropName "(" FormalParams ")" "{" GeneratorBody "}"
-            "get" PropName "(" ")" "{" FuncBody "}"
-            "set" PropName "(" PropSetParams ")" "{" FuncBody "}"
-        
-        PropertyName:
-            LiteralPropertyName
-            ComputedPropertyName
-        LiteralPropertyName:
-            IdentifierName  /* foo */
-            StringLiteral   /* "foo" */
-            NumericLiteral  /* 123.45, 0xFF */
-        ComputedPropertyName:
-            "[" Expression "]"
+        "class" BindingIdentifier ClassTail
+    ClassExpression:
+        "class" BindingIdentifier? ClassTail
+    
+    ClassTail:
+        ClassHeritage? "{" ClassBody? "}"
+    ClassHeritage:
+        "extends" AssignmentExpression
+    ClassBody:
+        ClassElement+
+    ClassElement:
+        MethodDefinition
+        "static" MethodDefinition
+        ";"
+    
+    MethodDefinition:
+        PropName "(" FormalParams ")" "{" FuncBody "}"
+        "*" PropName "(" FormalParams ")" "{" GeneratorBody "}"
+        "get" PropName "(" ")" "{" FuncBody "}"
+        "set" PropName "(" PropSetParams ")" "{" FuncBody "}"
+    
+    PropertyName:
+        LiteralPropertyName
+        ComputedPropertyName
+    LiteralPropertyName:
+        IdentifierName  /* foo */
+        StringLiteral   /* "foo" */
+        NumericLiteral  /* 123.45, 0xFF */
+    ComputedPropertyName:
+        "[" Expression "]"
     
 
 Two observations:
