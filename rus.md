@@ -266,8 +266,8 @@ _итератор_ [4]. Это означает, что его содержим�
     
 #### 2.3 Классы наследники {#subclassing}
 
-Ключевое слово _extends_ позволяет создать класс-наследник существующего конструктора 
-(который был или, возможно, не был определен с помощью класса):
+Ключевое слово _extends_ позволяет создать класс-наследник существующего 
+конструктора (который был или, возможно, не был определен с помощью класса):
 
     class Point {
         constructor(x, y) {
@@ -391,9 +391,9 @@ _итератор_ [4]. Это означает, что его содержим�
     }
     console.log(new Foo() instanceof Foo); // false
 
-Если вы сделаете так, то не имеет значения, инициализирован ли _this_ или нет.
+Если вы так сделаете, то не имеет значения, инициализирован ли _this_ или нет.
 Другими словами: вы не обязаны вызывать _super()_ в производном конструкторе, 
-если переопределить результат таким образом.
+если переопределите результат таким образом.
 
 ##### Конструкторы по умолчанию для классов {#default_constructors_for_classes}
 
@@ -439,12 +439,12 @@ _итератор_ [4]. Это означает, что его содержим�
 должен поддерживать изначально, вы не сможете получить эту функциональность 
 с помощью "костылей".
 
-### 3. The details of classes {#the_details_of_classes}
+### 3. Детали классов {#the_details_of_classes}
 
-What we have seen so far are the essentials of classes. You only need to read
-on if you are interested how things happen under the hood. Let’s start with the 
-syntax of classes. The following is a slightly modified version of the syntax 
-shown in[Sect. A.4 of the ECMAScript 6 specification][6].
+То, что мы до сих пор рассматривали является основой классов. Если вам 
+интересно узнать подробнее механизм классов, то вам нужно читать дальше. 
+Давайте начнем с синтаксиса классов. Ниже приводится немного модифицированная 
+верcия синтаксиса предложенного в [Секции. A.4 специфакации ECMAScript 6][6].
 
     ClassDeclaration:
         "class" BindingIdentifier ClassTail
@@ -479,37 +479,34 @@ shown in[Sect. A.4 of the ECMAScript 6 specification][6].
         "[" Expression "]"
     
 
-Two observations:
+Два наблюдения:
 
-*   The value to be extended can be produced by an arbitrary expression. Which
-    means that you’ll be able to write code such as the following:
-   
+*   Расширяемое значение может быть произвольным выражением. Это значит, что 
+    вы можете написать следующий код: 
     
         class Foo extends combine(MyMixin, MySuperClass) {}
-        
 
-*   Semicolons are allowed between methods.
+*   Между методами допускается точка с запятой.
 
-#### Various checks {#various_checks}
+#### 3.1 Различные проверки {#various_checks}
 
-*   Error checks: the class name cannot be `eval` or `arguments`; duplicate
-    class element names are not allowed; the name
-   `constructor` can only be used for a normal method, not for a getter, a
-    setter or a generator method.
-   
+*   Проверки ошибок: имя класса не может быть _eval_ or _arguments_; дубликаты
+    имен классов не допускаются; название _constructor_ может использоваться
+    только для обычных методов, для get'еров, set'еров и генераторов - 
+    не допускается.   
 
-*   Classes can’t be function-called. They throw a `TypeException` if they are
-    .
+*   Классы не могут быть вызываемой функцией. Иначе они бросают исключение 
+    _TypeException_
 
-*   Prototype methods cannot be used as constructors:
+*   Методы прототипа не могут использоваться как конструкторы:
     
         class C {
-                m() {}
-            }
-            new C.prototype.m(); // TypeError
+            m() {}
+        }
+        new C.prototype.m(); // TypeError
         
 
-#### Attributes of properties {#attributes_of_properties}
+#### 3.2 Атрибуты свойств {#attributes_of_properties}
 
 Class declarations create (mutable) let bindings. For a given class `Foo`:
 
@@ -527,54 +524,53 @@ Class declarations create (mutable) let bindings. For a given class `Foo`:
     enumerable.
    
 
-Note that method definitions in object literals produce enumerable properties
-.
+Note that method definitions in object literals produce enumerable properties.
 
-In ECMAScript 6, subclassing looks as follows.
+### 4. Детали наследования классов {#the_details_of_subclassing}
+
+В ECMAScript 6, наследование классов выглядит следующим образом:
 
     class Point {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-            }
-            ···
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
         }
-        
-        class ColorPoint extends Point {
-            constructor(x, y, color) {
-                super(x, y);
-                this.color = color;
-            }
-            ···
-        }
-        
-        let cp = new ColorPoint(25, 8, 'green');
+        ···
+    }
     
+    class ColorPoint extends Point {
+        constructor(x, y, color) {
+            super(x, y);
+            this.color = color;
+        }
+        ···
+    }
+    
+    let cp = new ColorPoint(25, 8, 'green');    
 
-This code produces the following objects.
+Этот код создает следующие объекты:
 
 ![][7] 
 
-The next subsection examines the prototype chains (in the two columns), the
-subsection after that examines how`cp` is allocated and initialized.
+Следующий подраздел расматривает цепочки прототипов (в две колонки), 
+подраздел после того рассматривает как _cp_ выделяется и инициализируется.
 
-#### Prototype chains {#prototype_chains}
+#### 4.1 Цепочки прототипов {#prototype_chains}
 
 In the diagram, you can see that there are two *prototype chains* (objects
 linked via the`[[Prototype]]` relationship, which is an inheritance
-relationship
-):
+relationship):
 
 *   Left column: classes (functions). The prototype of a derived class is the
     class it extends. The prototype of a base class is
    `Function.prototype`, which is also the prototype of functions:
     
         > const getProto = Object.getPrototypeOf.bind(Object);
-            
-            > getProto(Point) === Function.prototype
-            true
-            > getProto(function () {}) === Function.prototype
-            true
+        
+        > getProto(Point) === Function.prototype
+        true
+        > getProto(function () {}) === Function.prototype
+        true
         
 
 *   Right column: the prototype chain of the instance. The whole purpose of a
@@ -584,49 +580,47 @@ relationship
    
     
         > const getProto = Object.getPrototypeOf.bind(Object);
-            
-            > getProto(Point.prototype) === Object.prototype
-            true
-            > getProto({}) === Object.prototype
-            true
+        
+        > getProto(Point.prototype) === Object.prototype
+        true
+        > getProto({}) === Object.prototype
+        true
         
 
 The prototype chain in the left column leads to static properties being
 inherited.
 
-#### Allocating and initializing the instance object {#
-allocating_and_initializing_the_instance_object
-}
+#### 4.2 Allocating and initializing the instance object {#allocating_and_initializing_the_instance_object}
 
 The data flow between class constructors is different from the canonical way of
 subclassing in ES5. Under the hood, it roughly looks as follows.
 
     // Instance is allocated here
-        function Point(x, y) {
-            // Performed before entering this constructor:
-            this = Object.create(new.target.prototype);
-        
-            this.x = x;
-            this.y = y;
-        }
-        ···
-        
-        function ColorPoint(x, y, color) {
-            // Performed before entering this constructor:
-            this = uninitialized;
-        
-            this = Reflect.construct(Point, [x, y], new.target); // (A)
-                // super(x, y);
-        
-            this.color = color;
-        }
-        Object.setPrototypeOf(ColorPoint, Point);
-        ···
-        
-        let cp = Reflect.construct( // (B)
-                     ColorPoint, [25, 8, 'green'],
-                     ColorPoint);
-            // let cp = new ColorPoint(25, 8, 'green');
+    function Point(x, y) {
+        // Performed before entering this constructor:
+        this = Object.create(new.target.prototype);
+    
+        this.x = x;
+        this.y = y;
+    }
+    ···
+    
+    function ColorPoint(x, y, color) {
+        // Performed before entering this constructor:
+        this = uninitialized;
+    
+        this = Reflect.construct(Point, [x, y], new.target); // (A)
+            // super(x, y);
+    
+        this.color = color;
+    }
+    Object.setPrototypeOf(ColorPoint, Point);
+    ···
+    
+    let cp = Reflect.construct( // (B)
+             ColorPoint, [25, 8, 'green'],
+             ColorPoint);
+    // let cp = new ColorPoint(25, 8, 'green');
     
 
 The instance object is created in different locations in ES6 and ES5:
