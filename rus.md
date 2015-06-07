@@ -197,7 +197,7 @@ _ReferenceError_:
         }
     }
 
-Вы используете _MyClass_ следующим способом:
+_MyClass_ используется следующим способом:
 
     > let inst = new MyClass();
     > inst.prop = 123;
@@ -557,13 +557,12 @@ Note that method definitions in object literals produce enumerable properties.
 
 #### 4.1 Цепочки прототипов {#prototype_chains}
 
-In the diagram, you can see that there are two *prototype chains* (objects
-linked via the`[[Prototype]]` relationship, which is an inheritance
-relationship):
+На диаграмме видно что есть 2 _цепочки прототипов_ (объекты связаны через 
+отношения `[[Prototype]]`, которые наследуются):
 
-*   Left column: classes (functions). The prototype of a derived class is the
-    class it extends. The prototype of a base class is
-   `Function.prototype`, which is also the prototype of functions:
+*   Левая колонка: классы (функции). Прототипом производного класса является 
+    расширенный класс. Прототип базового класса является _Function.prototype_, 
+    которая также есть прототип функции:
     
         > const getProto = Object.getPrototypeOf.bind(Object);
         
@@ -573,11 +572,10 @@ relationship):
         true
         
 
-*   Right column: the prototype chain of the instance. The whole purpose of a
-    class is to set up this prototype chain. The prototype chain ends with
-   `Object.prototype` (whose prototype is `null`), which is also the prototype
-    of objects created via object literals:
-   
+*   Правая колонка: цепочки прототипов экземпляров. Вся цель класса - 
+    установить эту цепочку прототипов. Цепочка протипов заканчивается с
+    _Object.prototype_ (чей прототип является _null_), который также прототип 
+    объектов, созданных через литералы объекта:
     
         > const getProto = Object.getPrototypeOf.bind(Object);
         
@@ -586,14 +584,14 @@ relationship):
         > getProto({}) === Object.prototype
         true
         
+Из цепочки прототипов в левой колонке следует, что статические свойства наследуются.
 
-The prototype chain in the left column leads to static properties being
-inherited.
+Цепочка прототипов в левой колонке приводит к наследованию статических свойств.
 
-#### 4.2 Allocating and initializing the instance object {#allocating_and_initializing_the_instance_object}
+#### 4.2 Выделение памяти и инициализация экземпляров объектов {#allocating_and_initializing_the_instance_object}
 
-The data flow between class constructors is different from the canonical way of
-subclassing in ES5. Under the hood, it roughly looks as follows.
+Потоки данных между конструкторами классов отличается от канонического пути 
+наследования в ES5. Под капотом, это выглядит примерно так:
 
     // Instance is allocated here
     function Point(x, y) {
@@ -622,44 +620,37 @@ subclassing in ES5. Under the hood, it roughly looks as follows.
              ColorPoint);
     // let cp = new ColorPoint(25, 8, 'green');
     
+В ES5 и ES6 экземпляр объекта создается в разных местах:
 
-The instance object is created in different locations in ES6 and ES5:
-
-*   In ES6, it is created in the base constructor, the last in a chain of
-    constructor calls.
+*   В ES6 он создается базовым конструктором, последним в цепочке вызовов 
+    конструкторов.
+*   В ES5 он создается оператором _new_, первым в цепочке вызовов 
+    конструкторов.
    
-*   In ES5, it is created in the operand of `new`, the first in a chain of
-    constructor calls.
-   
+Предыдущий код использует две новые возможности ES6:
 
-The previous code uses two new ES6 features:
-
-*   `new.target` is an implicit parameter that all functions have. It is to
-    constructor calls what
-   `this` is to method calls.
+*   _new.target_ является неявным параметром, который имеют все функции.  Это
+    вызов конструктора, где _this_ является вызовом метода.
     
-    *   If a constructor has been directly invoked via `new`, its value is that
-        constructor (line B
-        ).
-    *   If a constructor was called via `super()`, its value is the 
-        `new.target` of the constructor that made the call (line A).
-    *   During a normal function call, it is `undefined`. That means that you
-        can use
-       `new.target` to determine whether a function was function-called or
-        constructor-called (via
-       `new`).
-    *   Inside an arrow function, `new.target` refers to the `new.target` of
-        the surrounding non-arrow function.
-       
+    *   Если конструктор напрямую вызывается через _new_, его значение это
+        и есть этот конструктор (строка B).
+    *   Если конструктор был вызван через _super()_, его значение это
+        _new.target_ конструктора который был вызван (строка A).
+    *   Вызвав функцию обычным способом, значение будет _undefined_. Это 
+        значит, что вы можете использовать _new.target_ чтобы определить была 
+        ли функция функцией вызова или вызовом конструктора (через _new_).
+    *   Внутри стрелочной функции _new.target_ ссылается на _new.target_
+        окружающие не стрелочные функции.
 
-*   `Reflect.construct()` [5] lets you do a constructor call while specifying
-   `new.target` via the last parameter.
+*   _Reflect.construct()_ [5] позволяет вызвать конструктор при задании
+    _new.target_ в качестве последнего параметра.
 
-The advantage of this way of subclassing is that it enables normal code to
-subclass built-in constructors (such as`Error` and `Array`). A later section
-explains why a different approach was necessary.
+Преимуществом этой реализации наследования является то, что это позволяет 
+писать нормальный код для наследования встроенных констукторов (такие как 
+_Error_ и _Array_). Последний раздел объясняет, почему иной подход был 
+необходим.
 
-##### Safety checks {#safety_checks}
+##### Безопасные проверки {#safety_checks}
 
 *   `this` originally being uninitialized in derived constructors means that an
     error is thrown if they access
@@ -689,17 +680,16 @@ The value of an `extends` clause must be “constructible” (invocable via `new
 `null` is allowed, though.
 
     class C {
-        }
+    }
     
 
 *   Constructor kind: base
 *   Prototype of `C`: `Function.prototype` (like a normal function)
 *   Prototype of `C.prototype`: `Object.prototype` (which is also the prototype
-    of objects created via object literals
-    )
+    of objects created via object literals)
 
     class C extends B {
-        }
+    }
     
 
 *   Constructor kind: derived
@@ -707,7 +697,7 @@ The value of an `extends` clause must be “constructible” (invocable via `new
 *   Prototype of `C.prototype`: `B.prototype` 
 
     class C extends Object {
-        }
+    }
     
 
 *   Constructor kind: derived
@@ -721,7 +711,7 @@ The resulting instances (including their prototype chains) are the same, but you
 get there differently.
 
     class C extends null {
-        }
+    }
     
 
 *   Constructor kind: derived
