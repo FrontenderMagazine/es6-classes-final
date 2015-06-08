@@ -68,7 +68,7 @@
 ##### Объявления классов не поднимаются {#class_declarations_are_not_hoisted}
 
 Объявления функций _поднимаются_: объявленные внутри общей области видимости
-функции сразу же доступны - независимо от того, где они были объявлены. Это 
+функции сразу же доступны независимо от того, где они были объявлены. Это 
 означает, что вы можете вызвать функцию, которая будет объявлена позднее.
 
     foo(); // works, because `foo` is hoisted
@@ -186,7 +186,7 @@ _ReferenceError_:
 ##### Get'еры и Set'еры {#getters_and_setters}
 
 Синтаксис для get'еров и set'еров такой же как и в 
-[in ECMAScript 5 object literals][4]:
+[в ECMAScript 5 литералах объекта][4]:
 
     class MyClass {
         get prop() {
@@ -303,7 +303,7 @@ _итератор_ [4]. Это означает, что его содержим�
 
 В данном случае мы имеем два вида классов:
 
-*   _Point_ - это _базовый класс_, потому что он не имеет ключевого слова _extends_.
+*   _Point_ - это _базовый класс_, потому что он не имеет выражения _extends_.
 *   _ColorPoint_ - _производный класс_.
 
 Есть два способа использовать ключевое слово _super_:
@@ -414,7 +414,8 @@ _итератор_ [4]. Это означает, что его содержим�
 конструкторов ([обходные пути в ES5][5], но здесь есть значительные ограничения).
 
 Например, теперь вы можете создавать свои собственные классы исключений 
-(которые будут наследовать такик особенности, как стек вызовов для большинстве движков):
+(которые будут наследовать такие особенности, как стек вызовов для 
+большинства движков):
 
     class MyError extends Error {    
     }
@@ -437,7 +438,7 @@ _итератор_ [4]. Это означает, что его содержим�
 
 Заметьте, что наследование от встроенных конструкторов это то, что движок 
 должен поддерживать изначально, вы не сможете получить эту функциональность 
-с помощью "костылей".
+с помощью транспайлеров.
 
 ### 3. Детали классов {#the_details_of_classes}
 
@@ -553,7 +554,7 @@ Note that method definitions in object literals produce enumerable properties.
 ![][7] 
 
 Следующий подраздел расматривает цепочки прототипов (в две колонки), 
-подраздел после того рассматривает как _cp_ выделяется и инициализируется.
+далее рассматривает как _cp_ выделяется в памяти и инициализируется.
 
 #### 4.1 Цепочки прототипов {#prototype_chains}
 
@@ -652,203 +653,204 @@ _Error_ и _Array_). Последний раздел объясняет, поч�
 
 ##### Безопасные проверки {#safety_checks}
 
-*   `this` originally being uninitialized in derived constructors means that an
-    error is thrown if they access
-   `this` in any way before they have called `super()`.
-*   Once `this` is initialized, calling `super()` produces a `ReferenceError`.
-    This protects you against calling
-   `super()` twice.
-*   If a constructor returns implicitly (without a `return` statement), the
-    result is
-   `this`. If `this` is uninitialized, a `ReferenceError` is thrown. This
-    protects you against forgetting to call
-   `super()`.
-*   If a constructor explicitly returns a non-object (including `undefined` and
-   `null`), the result is `this` (this behavior is required to remain
-    compatible with ES5 and earlier). If
-   `this` is uninitialized, a `TypeError` is thrown.
-*   If a constructor explicitly returns an object, it is used as its result.
-    Then it doesn’t matter whether
-   `this` is initialized or not.
+*   _this_ инициалированый в производных конструкторах значит что,
+    исключение будет бросаться если к _this_ обращаются до того как 
+    вызвали _super()_.
+*   После инициализации `this`, вызова _super()_ приведет к _ReferenceError_.
+    Это защита от двойного вызова _super()_.
+*   Если конструктор возвращается неявно (без _return_), тогда результат будет
+    _this_. Если _this_ инициализирован, тогда бросится исключение 
+    _ReferenceError_ . Это защита от невызова _super()_.
+*   Если конструктор явно возвращает не объект (включая _undefined_ и _null_),
+    результатом будет _this_ (это поведение остававляет совместимость с ES5 
+    и ранее). Если _this_ инициализирован, тогда бросится исключение 
+    _TypeError_.
+*   Если конструктор явно возвращает объект, тогда он и будет результатом.
+    Тогда не имеет значение инициализирован _this_ или нет.
 
-##### The `extends` clause {#the_extends_clause}
+##### Выражение _extends_ {#the_extends_clause}
 
-Let’s examine how the `extends` clause influences how a class is set up (
-[Sect. 14.5.14 of the spec][8]).
+Давайте рассмотрим как выражение _extends_ влияет на работу класса
+([Секция. 14.5.14 спецификации][8]).
 
-The value of an `extends` clause must be “constructible” (invocable via `new`
-`null` is allowed, though.
+Значение _extends_ должно быть "конструктивно" (ссылаться через _new_) 
+хотя _null_ тоже поддерживается.
 
     class C {
     }
     
 
-*   Constructor kind: base
-*   Prototype of `C`: `Function.prototype` (like a normal function)
-*   Prototype of `C.prototype`: `Object.prototype` (which is also the prototype
-    of objects created via object literals)
+*   Тип конструктора: базовый
+*   Прототип _C_: _Function.prototype_ (как обычная функция)
+*   Прототип _C.prototype_: _Object.prototype_ (который также прототип объекта
+    созданный через литералы объекта)
 
     class C extends B {
     }
     
 
-*   Constructor kind: derived
-*   Prototype of `C`: `B` 
-*   Prototype of `C.prototype`: `B.prototype` 
+*   Тип конструктора: наследник
+*   Прототип _C_: _B_ 
+*   Прототип _C.prototype_: _B.prototype_
 
     class C extends Object {
     }
     
 
-*   Constructor kind: derived
-*   Prototype of `C`: `Object` 
-*   Prototype of `C.prototype`: `Object.prototype` 
+*   Тип конструктора: наследник
+*   Прототип _C_: _Object_
+*   Прототип _C.prototype_: _Object.prototype_
 
-Note the following subtle difference with the first case: If there is no 
-`extends` clause, the class is a base class and allocates instances. If a class
-extends`Object`, it is a derived class and `Object` allocates the instances.
-The resulting instances (including their prototype chains) are the same, but you
-get there differently.
+Обратите внимание на следующее различие с первым случаем: 
+Если нет _extends_, класс является базовым и выделяет в памяти экземпляры. 
+Если класс расширяет _Object_, это производный класс объекта и выделяет 
+экземпляры. Полученные экземпляры (в том числе их цепочки прототипов)
+одинаковы, только получены разными способами.
 
     class C extends null {
     }
     
 
-*   Constructor kind: derived
-*   Prototype of `C`: `Function.prototype` 
-*   Prototype of `C.prototype`: `null` 
+*   Тип конструктора: наследник
+*   Прототип _C_: _Function.prototype_
+*   Прототип _C.prototype_: _null_ 
 
-Such a class is not very useful: `new`-calling it leads to an error, because
-the default constructor makes a super-constructor call and`Function.prototype`
-`constructor` that returns an object.
+Такой класс не является полезным: вызов через _new_ приведет к ошибке, потому 
+что конструктор по умолчанию сделает вызов базового конструктора и  
+_Function.prototype_ (базовый конструктор) не может быть конструктором вызова.
+Единственный способ избежать ошибки - это добавить конструктор который 
+возвратит объект.
 
-In ECMAScript 5, most built-in constructors can’t be subclassed (
-[several work-arounds exist][5]).
+#### 4.3 Почему мы не можем наследовать встроенные конструкторы в ЕС5? {#why_can’t_you_subclass_built-in_constructors_in_ES5}
 
-To understand why, let’s use the canonical ES5 pattern to subclass `Array`. As
-we shall soon find out, this doesn’t work.
+В ECMAScript 5, большинство встроенных конструкторов не могут быть унаследованы
+([несколько обходных путей][5]).
+
+Чтобы понять почему, давайте использовать канонический ES5 шаблон наследования
+_Array_. Как мы вскоре узнаем, это не работает.
 
     function MyArray(len) {
-            Array.call(this, len); // (A)
-        }
-        MyArray.prototype = Object.create(Array.prototype);
+        Array.call(this, len); // (A)
+    }
+    MyArray.prototype = Object.create(Array.prototype);
     
-
-Unfortunately, if we instantiate `MyArray`, we find out that it doesn’t work
-properly: The instance property`length` does not change in reaction to us
-adding array elements:
+К сожалению, если мы создадим _MyArray_, мы поймем, что он не работает должным
+образом: экземпляр свойства _length_ не изменится в ответ на наше добавление
+элементов в массив:
 
     > var myArr = new MyArray(0);
-        > myArr.length
-        0
-        > myArr[0] = 'foo';
-        > myArr.length
-        0
-    
+    > myArr.length
+    0
+    > myArr[0] = 'foo';
+    > myArr.length
+    0
 
-There are two obstracles that prevent `myArr` from being a proper array.
+Есть два препятствия, которые мешают _myArr_ быть правильным массивом.
 
-**First obstacle: initialization.** The `this` you hand to the constructor 
-`Array` (in line A) is completely ignored. That means you can’t use `Array` to
-set up the instance that was created for`MyArray`.
+**Первое припятствие: инициализация.** _this_ ручной конструктор _Array_ 
+(в строке A) полностью игнорируется. Это значит что вы не можете использовать
+_Array_ чтобы установить экземпляр который бы создавал _MyArray_.
 
     > var a = [];
-        > var b = Array.call(a, 3);
-        > a !== b  // a is ignored, b is a new object
-        true
-        > b.length // set up correctly
-        3
-        > a.length // unchanged
-        0
+    > var b = Array.call(a, 3);
+    > a !== b  // a is ignored, b is a new object
+    true
+    > b.length // set up correctly
+    3
+    > a.length // unchanged
+    0
     
 
-**Second obstacle: allocation.** The instance objects created by `Array` are *
-exotic* (a term used by the ECMAScript specification for objects that have
-features that normal objects don’t have): Their property`length` tracks and
-influences the management of array elements. In general, exotic objects can be 
-created from scratch, but you can’t convert an existing normal object into an 
-exotic one. Unfortunately, that is what`Array` would have to do, when called in
-line A: It would have to turn the normal object created for`MyArray` into an
-exotic array object.
+**Второе припятствие: выделение памяти.** Экзепляры объектов созданные через 
+_Array_ являются *экзотичными* (термин, используемый в спецификации ECMAScript 
+для объектов, которые имеют особенности, которые нормальные объекты не имеют): 
+их свойства _length_ отслеживают и влияют на управление элементами массива. 
+В общем, экзотичные объекты могут быть созданы с нуля, но вы не можете 
+преобразовать существующий обычный объект в экзотический. К сожалению, 
+это то, что делает _Array_, когда вызывается на строке A: 
+Он должен был превратить обычный объект, созданный  из _MyArray_ в 
+экзотический объект массива.
 
-In ECMAScript 6, subclassing `Array` looks as follows:
+##### Решение: ES6 наследование {#the_solution_ES6_subclassing}
+
+В ECMAScript 6, наследование _Array_ выглядит следующим образом:
 
     class MyArray extends Array {
-            constructor(len) {
-                super(len);
-            }
+        constructor(len) {
+            super(len);
         }
+    }
     
 
-This works (but it’s not something that ES6 transpilers can support, it
-depends on whether a JavaScript engine supports it natively
-):
+Это работает (но это не то, что ES6 транспайлеры могут поддерживать, это 
+зависит от того, поддерживает ли движок JavaScript это изначально):
 
     > let myArr = new MyArray(0);
-        > myArr.length
-        0
-        > myArr[0] = 'foo';
-        > myArr.length
-        1
+    > myArr.length
+    0
+    > myArr[0] = 'foo';
+    > myArr.length
+    1
     
 
-We can now see how the ES6 approach to subclassing circumvents the obstacles:
+Сейчас рассмотрим, как подход к наследованию в ES6, позволяет обойти 
+припятствия:
 
-*   Allocation happens in the base constructor, which means that `Array` can
-    allocate an exotic object. While most of the new approach is due to how derived 
-    constructors behave, this step requires that a base constructor is aware of
-   `new.target` and makes `new.target.prototype` the protoype of the allocated
-    instance.
-   
-*   Initialization also happens in the base constructor, a derived constructor
-    receives an initialized object and works with that one instead of passing its 
-    own instance to the super-constructor and requiring it to set it up.
-   
+*   Выделение пямяти происходит в базовом конструкторе. Это значит, что
+    что _Array_ может выделить в памяти экзотический объект. В то время как 
+    большая часть нового подхода связано с тем, как полученные конструкторы 
+    ведут себя, этот шаг требует, чтобы базовый конструктор понимает 
+    _new.target_ и делал _new.target.prototype_ в прототипе выделенного 
+    экземпляра.
 
-#### Referring to super-properties in methods {#referring_to_super-
-properties_in_methods
-}
+*   Инициализация также происходит в базовом конструкторе, конструктор 
+    класса-наследника получает инициализированный объект и работает с ним, 
+    вместо того, чтобы создавать собственный объект, отдавать его конструктору 
+    базового класса, чтобы тот его создавал.
 
-The following ES6 code makes a super-method call in line B.
+
+#### 4.4 Отсылка к базовым свойствам в методах {#referring_to_super_properties_in_methods}
+
+Следующий ES6 код делает вызов базового метода на строке B.
 
     class Point {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-            }
-            toString() { // (A)
-                return '(' + this.x + ', ' + this.y + ')';
-            }
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
         }
-        
-        class ColorPoint extends Point {
-            constructor(x, y, color) {
-                super(x, y);
-                this.color = color;
-            }
-            toString() {
-                return super.toString() // (B)
-                       + ' in ' + this.color;
-            }
+        toString() { // (A)
+            return '(' + this.x + ', ' + this.y + ')';
         }
-        
-        let cp = new ColorPoint(25, 8, 'green');
-        console.log(cp.toString()); // (25, 8) in green
+    }
+    
+    class ColorPoint extends Point {
+        constructor(x, y, color) {
+            super(x, y);
+            this.color = color;
+        }
+        toString() {
+            return super.toString() // (B)
+                   + ' in ' + this.color;
+        }
+    }
+    
+    let cp = new ColorPoint(25, 8, 'green');
+    console.log(cp.toString()); // (25, 8) in green
     
 
-To understand how super-calls work, let’s look at the object diagram of `cp`:
+Чтобы понять как работает базовые вызовы, давайте взглянем на диаграмму 
+объекта _cp_:
 
 ![][9] 
 
-`ColorPoint.prototype.toString` makes a super-call (line B) to the method (
-starting in line A) that it has overridden. Let’s call the object, in which a 
-method is stored, the*home object* of that method. For example, 
-`ColorPoint.prototype` is the home object of `ColorPoint.prototype.toString()`
+_ColorPoint.prototype.toString_ делает базовый вызов (строка B) метода 
+(начиная со строки A) который переопределен. Давайте вызовем объект, в котором 
+хранится *главный объект* этот метод. Например, 
+_ColorPoint.prototype_ главный объект для _ColorPoint.prototype.toString()_.
 
-The super-call in line B involves three steps:
+Базовый вызов на строке B включает три этапа:
 
-1.  Start your search in the prototype of the home object of the current method
-    .
+1.  Начинается поиск в прототипе главного объекта текущего метода.
 
 2.  Look for a method whose name is `toString`. That method may be found in the
     object where the search started or later in the prototype chain.
@@ -866,25 +868,24 @@ be implemented via a getter or a setter.
 Let’s express these steps in three different, but equivalent, ways:
 
     // Variation 1: super-method calls in ES5
-        var result = Point.prototype.toString.call(this) // steps 1,2,3
-        
-        // Variation 2: ES5, refactored
-        var superObject = Point.prototype; // step 1
-        var superMethod = superObject.toString; // step 2
-        var result = superMethod.call(this) // step 3
-        
-        // Variation 3: ES6
-        var homeObject = ColorPoint.prototype;
-        var superObject = Object.getPrototypeOf(homeObject); // step 1
-        var superMethod = superObject.toString; // step 2
-        var result = superMethod.call(this) // step 3
+    var result = Point.prototype.toString.call(this) // steps 1,2,3
+    
+    // Variation 2: ES5, refactored
+    var superObject = Point.prototype; // step 1
+    var superMethod = superObject.toString; // step 2
+    var result = superMethod.call(this) // step 3
+    
+    // Variation 3: ES6
+    var homeObject = ColorPoint.prototype;
+    var superObject = Object.getPrototypeOf(homeObject); // step 1
+    var superMethod = superObject.toString; // step 2
+    var result = superMethod.call(this) // step 3
     
 
 Variation 3 is how ECMAScript 6 handles super-calls. This approach is supported
 by[two internal *bindings*][10] that the *environments* of functions have (*
 environments* provide storage space, so-called *bindings*, for the variables in
-a scope
-):
+a scope):
 
 *   `[[thisValue]]`: This internal binding also exists in ECMAScript 5 and
     stores the value of
@@ -909,9 +910,7 @@ which is why you can use it in method definitions inside object literals and
 class literals (the class can be derived or not, the method can be static or not
 ).
 
-### Constructor calls explained via JavaScript code {#
-constructor_calls_explained_via_javascript_code
-}
+### 5. Constructor calls explained via JavaScript code {#constructor_calls_explained_via_javascript_code}
 
 The JavaScript code in this section is a much simplified version of how the
 specification describes constructor calls and super-constructor calls. It may be
@@ -950,32 +949,32 @@ stack is considered active. The following code is a sketch of how environments
 are handled.
 
     /**
-         * Function environments are special, they have a few more
-         * internal variables than other environments.
-         * (`Environment` is not shown here)
-         */
-        class FunctionEnvironment extends Environment {
-            constructor(Func) {
-                // [[FunctionObject]] is a function-specific
-                // internal variable
-                this.__FunctionObject__ = Func;
-            }    
-        }
-        
-        /**
-         * Push an environment onto the stack
-         */
-        function PushEnvironment(env) { ··· }
-        
-        /**
-         * Pop the topmost environment from the stack
-         */
-        function PopEnvironment() { ··· }
-        
-        /**
-         * Find topmost function environment on stack
-         */
-        function GetThisEnvironment() { ··· }
+     * Function environments are special, they have a few more
+     * internal variables than other environments.
+     * (`Environment` is not shown here)
+     */
+    class FunctionEnvironment extends Environment {
+        constructor(Func) {
+            // [[FunctionObject]] is a function-specific
+            // internal variable
+            this.__FunctionObject__ = Func;
+        }    
+    }
+    
+    /**
+     * Push an environment onto the stack
+     */
+    function PushEnvironment(env) { ··· }
+    
+    /**
+     * Pop the topmost environment from the stack
+     */
+    function PopEnvironment() { ··· }
+    
+    /**
+     * Find topmost function environment on stack
+     */
+    function GetThisEnvironment() { ··· }
     
 
 #### Constructor calls {#constructor_calls}
@@ -984,46 +983,46 @@ Let’s start with the default way ([ES6 spec Sect. 9.2.3][11]) in which
 constructor calls are handled for functions:
 
     /**
-         * All constructible functions have this own method,
-         * it is called by the `new` operator
-         */
-        AnyFunction.__Construct__ = function (args, newTarget) {
-            let Constr = this;
-            let kind = Constr.__ConstructorKind__;
-        
-            let env = new FunctionEnvironment(Constr);
-            env.__NewTarget__ = newTarget;
-            if (kind === 'base') {
-                env.__thisValue__ = Object.create(newTarget.prototype);
-            } else {
-                // While `this` is uninitialized, getting or setting it
-                // throws a `ReferenceError`
-                env.__thisValue__ = uninitialized;
-            }
-        
-            PushEnvironment(env);
-            let result = Constr(...args);
-            PopEnvironment();
-        
-            // Let’s pretend there is a way to tell whether `result`
-            // was explicitly returned or not
-            if (WasExplicitlyReturned(result)) {
-                if (isObject(result)) {
-                    return result;
-                }
-                // Explicit return of a primitive
-                if (kind === 'base') {
-                    // Base constructors must be backwards compatible
-                    return env.__thisValue__; // always initialized!
-                }
-                throw new TypeError();
-            }
-            // Implicit return
-            if (env.__thisValue__ === uninitialized) {
-                throw new ReferenceError();
-            }
-            return env.__thisValue__;
+     * All constructible functions have this own method,
+     * it is called by the `new` operator
+     */
+    AnyFunction.__Construct__ = function (args, newTarget) {
+        let Constr = this;
+        let kind = Constr.__ConstructorKind__;
+    
+        let env = new FunctionEnvironment(Constr);
+        env.__NewTarget__ = newTarget;
+        if (kind === 'base') {
+            env.__thisValue__ = Object.create(newTarget.prototype);
+        } else {
+            // While `this` is uninitialized, getting or setting it
+            // throws a `ReferenceError`
+            env.__thisValue__ = uninitialized;
         }
+    
+        PushEnvironment(env);
+        let result = Constr(...args);
+        PopEnvironment();
+    
+        // Let’s pretend there is a way to tell whether `result`
+        // was explicitly returned or not
+        if (WasExplicitlyReturned(result)) {
+            if (isObject(result)) {
+                return result;
+            }
+            // Explicit return of a primitive
+            if (kind === 'base') {
+                // Base constructors must be backwards compatible
+                return env.__thisValue__; // always initialized!
+            }
+            throw new TypeError();
+        }
+        // Implicit return
+        if (env.__thisValue__ === uninitialized) {
+            throw new ReferenceError();
+        }
+        return env.__thisValue__;
+    }
     
 
 #### Super-constructor calls {#super-constructor_calls_2}
@@ -1031,17 +1030,17 @@ constructor calls are handled for functions:
 Super-constructor calls are handled as follows ([ES6 spec Sect. 12.3.5.1][12]
 
     /**
-         * Handle super-constructor calls
-         */
-        function super(...args) {
-            let env = GetThisEnvironment();
-            let newTarget = env.__NewTarget__;
-            let activeFunc = env.__FunctionObject__;
-            let superConstructor = Object.getPrototypeOf(activeFunc);
-        
-            env.__thisValue__ = superConstructor
-                                .__Construct__(args, newTarget);
-        }
+     * Handle super-constructor calls
+     */
+    function super(...args) {
+        let env = GetThisEnvironment();
+        let newTarget = env.__NewTarget__;
+        let activeFunc = env.__FunctionObject__;
+        let superConstructor = Object.getPrototypeOf(activeFunc);
+    
+        env.__thisValue__ = superConstructor
+                            .__Construct__(args, newTarget);
+    }
     
 
 ### The species pattern {#the_species_pattern}
@@ -1062,27 +1061,26 @@ to remain a direct instance of`Array`. ES6 lets subclasses override the default
 You can override the default, via a static getter (line A):
 
     class MyArray1 extends Array {
+    }
+    let result1 = new MyArray1().map(x => x);
+    console.log(result1 instanceof MyArray1); // true
+    
+    class MyArray2 extends Array {
+        static get [Symbol.species]() { // (A)
+            return Array;
         }
-        let result1 = new MyArray1().map(x => x);
-        console.log(result1 instanceof MyArray1); // true
-        
-        class MyArray2 extends Array {
-            static get [Symbol.species]() { // (A)
-                return Array;
-            }
-        }
-        let result2 = new MyArray2().map(x => x);
-        console.log(result2 instanceof MyArray2); // false
+    }
+    let result2 = new MyArray2().map(x => x);
+    console.log(result2 instanceof MyArray2); // false
     
 
 An alternative is to use `Object.defineProperty()` (you can’t use assignment
-, as that would trigger a setter, which doesn’t exist
-):
+, as that would trigger a setter, which doesn’t exist):
 
     Object.defineProperty(
-            MyArray2, Symbol.species, {
-                value: Array
-            });
+        MyArray2, Symbol.species, {
+            value: Array
+        });
     
 
 The following getters all return `this`, which means that methods such as 
