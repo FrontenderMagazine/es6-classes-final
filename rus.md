@@ -509,7 +509,7 @@ _итератор_ [4]. Это означает, что его содержим�
 
 #### 3.2 Атрибуты свойств {#attributes_of_properties}
 
-Class declarations create (mutable) let bindings. For a given class `Foo`:
+Class declarations create (mutable) let bindings. For a given class _Foo_:
 
 *   Static methods `Foo.*` are writable and configurable, but not enumerable.
     Making them writable allows for dynamic patching.
@@ -517,11 +517,11 @@ Class declarations create (mutable) let bindings. For a given class `Foo`:
 *   A constructor and the object in its property `prototype` have an immutable
     link:
    
-    *   `Foo.prototype` is non-writeable, non-enumerable, non-configurable.
-    *   `Foo.prototype.constructor` is non-writeable, non-enumerable, non-
+    *   _Foo.prototype_ is non-writeable, non-enumerable, non-configurable.
+    *   _Foo.prototype.constructor_ is non-writeable, non-enumerable, non-
         configurable.
        
-*   Prototype methods `Foo.prototype.*` are writable and configurable, but not
+*   Prototype methods _Foo.prototype.*_ are writable and configurable, but not
     enumerable.
    
 
@@ -891,7 +891,7 @@ _состояния_ функций (_состояния_ обеспечивае
     использововашие _super_.  И привязка и свойство являются новыми в 
     ECMAScript 6.
    
-Определение метода в литерале класса которое использует _super_ теперь 
+Определение метода в литерале класса который использует _super_ теперь 
 особенно: это значение все еще функция, но имеет внутреннее свойство 
 _[[HomeObject]]_. Это свойство устанавливается определением метода и не может
 быть изменено в JavaScript. Таким образом, вы не можете перенести этот метод
@@ -1122,8 +1122,7 @@ would be unanimously accepted by TC39.
 Upcoming versions of ECMAScript can now extend this minimal design – classes
 will provide a foundation for features such as traits (or mixins), value objects
 (where different objects are equal if they have the same content) and const 
-classes (that produce immutable instances
-).
+classes (that produce immutable instances).
 
 #### 7.3 JavaScript'у нужны классы? {#does_javascript_need_classes%3F}
 
@@ -1131,7 +1130,7 @@ Classes are controversial within the JavaScript community. On one hand, people
 coming from class-based languages are happy that they don’t have to deal with 
 JavaScript’s unorthodox inheritance mechanisms, anymore. On the other hand, 
 there are many JavaScript programmers who argue that what’s complicated about 
-JavaScript is not prototypal inheritance, but constructors[6].
+JavaScript is not prototypal inheritance, but constructors [6].
 
 ES6 classes provide a few clear benefits:
 
@@ -1150,22 +1149,26 @@ ES6 classes provide a few clear benefits:
    
 
 *   They provide a foundation for advanced features in the future (mixins and
-    more
-    ).
+    more).
 
 *   They help tools that statically analyze code (IDEs, type checkers, style
-    checkers, etc.
-    ).
+    checkers, etc.).
 
-I have made my peace with classes and am glad that they are in ES6. I would
-have preferred them to be prototypal (based on constructor objects[6], not
-constructor functions), but I also understand that backwards compatibility is 
-important.
+Я закончил мою часть с классами и я рад, что они есть в ES6. Я бы
+предпочел, чтобы они были прототипными (на основе конструктора объектов [6], а не
+конструктора функций), но я также понимаю, что обратная совместимость является
+важной.
 
 ### 8. Для дополнительного чтения {#further_reading}
 
-Acknowledgement: #1 was an important source of this blog post.
+Подтверждение: #1 был важным источником этой статьи.
 
+1. [Instantiation Reform: One last time](https://github.com/rwaldron/tc39-notes/blob/master/es6/2015-01/jan2015-allen-slides.pdf), slides by Allen Wirfs-Brock.
+2. [Exploring ES6: Upgrade to the next version of JavaScript](http://exploringjs.com/), book by Axel
+3. [Symbols in ECMAScript 6](http://www.2ality.com/2014/12/es6-symbols.html)
+4. [Iterators and generators in ECMAScript 6](http://www.2ality.com/2013/06/iterators-generators.html)
+5. [Meta programming with ECMAScript 6 proxies](http://www.2ality.com/2014/12/es6-proxies.html)
+6. [Prototypes as classes – an introduction to JavaScript inheritance](http://www.2ality.com/2011/06/prototypes-as-classes.html)
 
  [1]: https://github.com/rwaldron/tc39-notes/blob/master/es6/2015-01/jan-27.md#44-subclass-instantiation-reformation-status-and-open-issues
 
