@@ -89,7 +89,7 @@ _ReferenceError_:
 произвольным. Это выражение должно вычислено в правильном месте,
 которое не может быть _поднято_.
 
-Отсутствие механизма _поднятия_ - это не такое большое ограничение, чем вы
+Отсутствие механизма _поднятия_ - это не такое большое ограничение, как вы
 могли бы подумать. Например, функция, которая определена до определения 
 класса, все еще может ссылаться на этот класс, но вы вынуждены ждать
 выполнения определения класса до того, как сможете выполнить эту функцию.
@@ -398,7 +398,7 @@ _итератор_ [4]. Это означает, что его содержим�
 ##### Конструкторы по умолчанию для классов {#default_constructors_for_classes}
 
 Если вы не указываете _constructor_  для базового класса, тогда испольузется
-слудающая конструкция:
+следующая конструкция:
 
     constructor() {}
 
@@ -848,24 +848,22 @@ _ColorPoint.prototype.toString_ делает базовый вызов (стро
 хранится *главный объект* этот метод. Например, 
 _ColorPoint.prototype_ главный объект для _ColorPoint.prototype.toString()_.
 
-Базовый вызов на строке B включает три этапа:
+Базовый вызов на строке B состоит из трёх этапов:
 
 1.  Начинается поиск в прототипе главного объекта текущего метода.
 
-2.  Look for a method whose name is `toString`. That method may be found in the
-    object where the search started or later in the prototype chain.
-   
+2.  Поиск метода с названием _toString_. Этот метод должен быть найден в 
+    объекте где начался поиск или позже по цепочке прототипов.   
 
-3.  Call that method with the current `this`. The reason for doing so is: the
-    super-called method must be able to access the same instance properties (in our 
-    example, the properties of
-   `cp`).
+3.  Вызвать этот метод с текущим _this_. Причина почему это происходит: 
+    метод вызываемый как базовый должен иметь возможность доступа к тем же 
+    свойствам экземпляра (в нашем примере, к свойствам _cp_).
 
-Note that even if you are only getting or setting a property (not calling a
-method), you still have to consider`this` in step #3, because the property may
-be implemented via a getter or a setter.
+Обратите внимание, что даже если вы только получаете или установливаете 
+свойство (без вызова метода), вам все равно придется учитывать _this_ 
+в шаге 3, потому что свойство может быть реализовано через get'ер или set'ер.
 
-Let’s express these steps in three different, but equivalent, ways:
+Давайте реализуем эти шаги в трех различных, но эквивалентных способах:
 
     // Variation 1: super-method calls in ES5
     var result = Point.prototype.toString.call(this) // steps 1,2,3
@@ -881,72 +879,68 @@ Let’s express these steps in three different, but equivalent, ways:
     var superMethod = superObject.toString; // step 2
     var result = superMethod.call(this) // step 3
     
+Способ 3 показывает как в ECMAScript 6 обрабатываются базовые вызовы. Этот подход 
+поддериживается [двумя внутренними *привязками*][10] которые имеет 
+_состояния_ функций (_состояния_ обеспечивает хранилище, так называемые 
+*привязки*, для переменных окружения):
 
-Variation 3 is how ECMAScript 6 handles super-calls. This approach is supported
-by[two internal *bindings*][10] that the *environments* of functions have (*
-environments* provide storage space, so-called *bindings*, for the variables in
-a scope):
-
-*   `[[thisValue]]`: This internal binding also exists in ECMAScript 5 and
-    stores the value of
-   `this`.
-*   `[[HomeObject]]`: Refers to the home object of the environment’s function
-    . Filled in via an internal property
-   `[[HomeObject]]` that all methods have that use `super`. Both the binding
-    and the property are new in ECMAScript 6.
+*   _[[thisValue]]_: Эта внутрення привязка также есть и в ECMAScript 5 и
+    хранит значение переменной _this_.
+*   `[[HomeObject]]`: Относится к главному объекту среды функции. Заполняется
+    через внутреннее свойство _[[HomeObject]]_ которое имеют все функции, 
+    использововашие _super_.  И привязка и свойство являются новыми в 
+    ECMAScript 6.
    
+Определение метода в литерале класса которое использует _super_ теперь 
+особенно: это значение все еще функция, но имеет внутреннее свойство 
+_[[HomeObject]]_. Это свойство устанавливается определением метода и не может
+быть изменено в JavaScript. Таким образом, вы не можете перенести этот метод
+в другой объект.
 
-A method definition in a class literal that uses `super` is now special: Its
-value is still a function, but it has the internal property`[[HomeObject]]`.
-That property is set up by the method definition and can’t be changed in 
-JavaScript. Therefore, you can’t meaningfully move such a method to a different 
-object.
+Использование _super_ не допускается для обращения к свойству в определениях 
+функций, выражениях функций и генераторах.
 
-Using `super` to refer to a property is not allowed in function declarations,
-function expressions and generator functions.
+Ссылаться на базовые свойства удобно, когда участвуют прототипы цепочек, 
+поэтому вы можете использовать их в определениях методов, внутри литералов 
+объектов и литералах классов (класс при этом может быть унаследованным или 
+нет, метод может быть статическим или нет).
 
-Referring to super-properties is handy whenever prototype chains are involved,
-which is why you can use it in method definitions inside object literals and 
-class literals (the class can be derived or not, the method can be static or not
-).
+### 5. Пояснение вызовов конструктора через JavaScript код {#constructor_calls_explained_via_javascript_code}
 
-### 5. Constructor calls explained via JavaScript code {#constructor_calls_explained_via_javascript_code}
+Код JavaScript в этом разделе достаточно упрощен по сравнению с тем, как 
+спецификация описывает вызовы конструктора и вызовы базового конструктора. 
+Это может быть интересно для вас, если вы предпочитаете объяснения кода 
+человеческим языком. Прежде чем мы углубимся в функциональность, мы должны 
+понимать несколько других механизмов.
 
-The JavaScript code in this section is a much simplified version of how the
-specification describes constructor calls and super-constructor calls. It may be
-interesting to you if you prefer code to explanations in human language. Before 
-we can delve into the actual functionality, we need to understand a few other 
-mechanisms.
+#### 5.1 Внутренние переменные и свойства {#internal_variables_and_properties}
 
-#### Internal variables and properties {#internal_variables_and_properties}
+Спецификация описывает внутренние переменные и свойства в двойных скобках 
+(_[[Foo]]_). В коде я использую двойные подчеркивания вместо этого 
+(`__Foo__`).
 
-The specification writes internal variables and properties in double brackets
-(`[[Foo]]`). In the code, I use double underscores, instead (`__Foo__`).
+Внутренние переменные используемые в коде:
 
-Internal variables used in the code:
+*   _[[NewTarget]]_: Операнд _new_ оператора, который вызвал текущий вызов 
+    конструктора (пройдет, если [[Construct]] вызывался рекурсивно через
+    _super()_).
+*   _[[thisValue]]_: Хранит значение _this_.
+*   _[[FunctionObject]]_: Ссылается на функцию, которая в настоящее 
+    время выполняется.
 
-*   `[[NewTarget]]`: The operand of the `new` operator that triggered the
-    current constructor call (passed on if
-   `[[Construct]]` is called recursively via `super()`).
-*   `[[thisValue]]`: Stores the value of `this`.
-*   `[[FunctionObject]]`: Refers to the function that is currently executed.
+Внутренние свойства используемые в коде:
 
-Internal properties used in the code:
+*   _[[Construct]]_: Все функции конструткора (включая также созданные 
+    классом) имеют этот собственный (не наследуемый) метод. Он реализует 
+    вызов конструктора и вызывается через _new_.
+*   _[[ConstructorKind]]_: Свойство функций конструктора значение которого
+    либо _'base'_ либо _'derived'_.
 
-*   `[[Construct]]`: All constructor functions (including those created by
-    classes) have this own (non-inherited) method. It implements constructor calls 
-    and is invoked by
-   `new`.
-*   `[[ConstructorKind]]`: A property of constructor functions whose value is
-    either
-   `'base'` or `'derived'`.
+#### 5.2 Состояния {#environments}
 
-#### Environments {#environments}
-
-*Environments* provide storage space for variables, there is one environment
-per scope. Environments are managed as a stack. The environment on top of that 
-stack is considered active. The following code is a sketch of how environments 
-are handled.
+*Состояния* обеспечивают хранилище для переменных, одно состояние на 
+окружение. Состояния управляются как стек. Состояние на вершине стека 
+считается активным. Следующий код демонстриурет как состояния обрабатываются.
 
     /**
      * Function environments are special, they have a few more
@@ -958,7 +952,7 @@ are handled.
             // [[FunctionObject]] is a function-specific
             // internal variable
             this.__FunctionObject__ = Func;
-        }    
+        }
     }
     
     /**
@@ -977,10 +971,10 @@ are handled.
     function GetThisEnvironment() { ··· }
     
 
-#### Constructor calls {#constructor_calls}
+#### 5.3 Вызов конструктора {#constructor_calls}
 
-Let’s start with the default way ([ES6 spec Sect. 9.2.3][11]) in which
-constructor calls are handled for functions:
+Давайте начнем с основ ([ES6 спецификация, Секция. 9.2.3][11]), где вызовы 
+конструктора обрабатываются для функций:
 
     /**
      * All constructible functions have this own method,
@@ -1025,9 +1019,10 @@ constructor calls are handled for functions:
     }
     
 
-#### Super-constructor calls {#super-constructor_calls_2}
+#### 5.4 Вызов базового конструктора {#super-constructor_calls_2}
 
-Super-constructor calls are handled as follows ([ES6 spec Sect. 12.3.5.1][12]
+Вызов базового конструктора обрабатывается следующим образом
+([ES6 спецификация, Секция. 12.3.5.1][12]).
 
     /**
      * Handle super-constructor calls
@@ -1043,10 +1038,10 @@ Super-constructor calls are handled as follows ([ES6 spec Sect. 12.3.5.1][12]
     }
     
 
-### The species pattern {#the_species_pattern}
+### 6. The species pattern {#the_species_pattern}
 
 One more mechanism of built-in constructors has been made extensible in
-ECMAScript 6: If a method such as`Array.prototype.map()` returns a fresh
+ECMAScript 6: If a method such as `Array.prototype.map()` returns a fresh
 instance, what constructor should it use to create that instance? The default is
 to use the same constructor that created`this`, but some subclasses may want it
 to remain a direct instance of`Array`. ES6 lets subclasses override the default
@@ -1095,9 +1090,9 @@ for their results.
 *   `Set.get [Symbol.species]()`
 *   `%TypedArray%.get [Symbol.species]()`
 
-### Conclusion {#conclusion}
+### 7. Заключение {#conclusion}
 
-#### The specialization of functions {#the_specialization_of_functions}
+#### 7.1 Специализация функций {#the_specialization_of_functions}
 
 There is an interesting trend in ECMAScript 6: Previously, a single kind of
 function took on three roles: real function, method and constructor. In ES6, 
@@ -1118,7 +1113,7 @@ there is specialization:
     produce functions that can only be constructor-called.
    
 
-#### The future of classes {#the_future_of_classes}
+#### 7.2 Будущее классов {#the_future_of_classes}
 
 The design maxim for classes was “maximally minimal”. Several advanced
 features were discussed, but ultimately discarded in order to get a design that 
@@ -1130,7 +1125,7 @@ will provide a foundation for features such as traits (or mixins), value objects
 classes (that produce immutable instances
 ).
 
-#### Does JavaScript need classes? {#does_javascript_need_classes%3F}
+#### 7.3 JavaScript'у нужны классы? {#does_javascript_need_classes%3F}
 
 Classes are controversial within the JavaScript community. On one hand, people
 coming from class-based languages are happy that they don’t have to deal with 
@@ -1167,7 +1162,7 @@ have preferred them to be prototypal (based on constructor objects[6], not
 constructor functions), but I also understand that backwards compatibility is 
 important.
 
-### Further reading {#further_reading}
+### 8. Для дополнительного чтения {#further_reading}
 
 Acknowledgement: #1 was an important source of this blog post.
 
