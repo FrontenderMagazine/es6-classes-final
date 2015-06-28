@@ -562,7 +562,7 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
 
 #### 4.1 Цепочки прототипов
 
-На диаграмме видно что есть 2 _цепочки прототипов_ (объекты связаны через 
+На диаграмме видно, что есть 2 _цепочки прототипов_ (объекты связаны через 
 отношения `[[Prototype]]`, которые наследуются):
 
 *   Левая колонка: классы (функции). Прототипом производного класса является 
@@ -643,7 +643,7 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
         значит, что вы можете использовать `new.target` чтобы определить, была 
         ли функция функцией вызова или вызовом конструктора (через `new`).
     *   Внутри стрелочной функции `new.target` ссылается на `new.target`
-        окружающей не стрелочной функции.
+        окружающей нестрелочной функции.
 
 *   `Reflect.construct()` [5] позволяет вызвать конструктор при задании
     `new.target` в качестве последнего параметра.
@@ -1164,12 +1164,12 @@ _Состояния_ обеспечивают хранилище для пере
 
 Подтверждение: #1 был важным источником этой статьи.
 
-1. [Instantiation Reform: One last time](https://github.com/rwaldron/tc39-notes/blob/master/es6/2015-01/jan2015-allen-slides.pdf)    {#anchor-1}, slides by Allen Wirfs-Brock.
-2. [Exploring ES6: Upgrade to the next version of JavaScript](http://exploringjs.com/){#anchor-2}, book by Axel
-3. [Symbols in ECMAScript 6](http://www.2ality.com/2014/12/es6-symbols.html){#anchor-3}
-4. [Iterators and generators in ECMAScript 6](http://www.2ality.com/2013/06/iterators-generators.html){#anchor-4}
-5. [Meta programming with ECMAScript 6 proxies](http://www.2ality.com/2014/12/es6-proxies.html){#anchor-5}
-6. [Prototypes as classes – an introduction to JavaScript inheritance](http://www.2ality.com/2011/06/prototypes-as-classes.html){#anchor-6}
+1. <span id="anchor-1">[Instantiation Reform: One last time](https://github.com/rwaldron/tc39-notes/blob/master/es6/2015-01/jan2015-allen-slides.pdf)</span>, slides by Allen Wirfs-Brock.
+2. <span id="anchor-2">[Exploring ES6: Upgrade to the next version of JavaScript](http://exploringjs.com/)</span>, book by Axel
+3. <span id="anchor-3">[Symbols in ECMAScript 6](http://www.2ality.com/2014/12/es6-symbols.html)</span>
+4. <span id="anchor-4">[Iterators and generators in ECMAScript 6](http://www.2ality.com/2013/06/iterators-generators.html)</span>
+5. <span id="anchor-5">[Meta programming with ECMAScript 6 proxies](http://www.2ality.com/2014/12/es6-proxies.html)</span>
+6. <span id="anchor-6">[Prototypes as classes – an introduction to JavaScript inheritance](http://www.2ality.com/2011/06/prototypes-as-classes.html)</span>
 
 
  [1]: https://github.com/rwaldron/tc39-notes/blob/master/es6/2015-01/jan-27.md#44-subclass-instantiation-reformation-status-and-open-issues
