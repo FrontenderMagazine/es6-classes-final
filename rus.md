@@ -13,7 +13,7 @@
             return '(' + this.x + ', ' + this.y + ')';
         }
     }
-
+     
     class ColorPoint extends Point {
         constructor(x, y, color) {
             super(x, y);
@@ -23,10 +23,10 @@
             return super.toString() + ' in ' + this.color;
         }
     }
-    
+     
     let cp = new ColorPoint(25, 8, 'green');
     cp.toString(); // '(25, 8) in green'
-    
+     
     console.log(cp instanceof ColorPoint); // true
     console.log(cp instanceof Point); // true
     
@@ -71,7 +71,7 @@
 функции сразу же доступны, независимо от того, где они были объявлены. Это 
 означает, что вы можете вызвать функцию, которая будет объявлена позднее.
 
-    foo(); // works, because `foo` is hoisted
+    foo(); // работает, так как `foo` _поднялась_
     
     function foo() {}
     
@@ -118,7 +118,7 @@ _«ReferenceError»_:
     };
     let inst = new MyClass();
     console.log(inst.getClassName()); // Me
-    console.log(Me.name); // ReferenceError: Me is not defined
+    console.log(Me.name); // ReferenceError: Me не определен
     
 
 #### 2.2 Внутри тела определения класса
@@ -218,11 +218,11 @@ _«ReferenceError»_:
     class Foo() {
         myMethod() {}
     }
-    
+     
     class Foo() {
         ['my'+'Method']() {}
     }
-    
+     
     const m = 'myMethod';
     class Foo() {
         [m]() {}
@@ -263,7 +263,7 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
         console.log(x);
     }
     
-    // Output:
+    // Вывод:
     // hello
     // world
     
@@ -433,8 +433,8 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
             super(len);
         }
     }
-    
-    // Instances of of `MyArray` work like real arrays:
+     
+    // Экземпляры класса `MyArray` работают так же как обычный масив: 
     let myArr = new MyArray(0);
     console.log(myArr.length); // 0
     myArr[0] = 'foo';
@@ -455,7 +455,7 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
         "class" BindingIdentifier ClassTail
     ClassExpression:
         "class" BindingIdentifier? ClassTail
-    
+     
     ClassTail:
         ClassHeritage? "{" ClassBody? "}"
     ClassHeritage:
@@ -466,13 +466,13 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
         MethodDefinition
         "static" MethodDefinition
         ";"
-    
+     
     MethodDefinition:
         PropName "(" FormalParams ")" "{" FuncBody "}"
         "*" PropName "(" FormalParams ")" "{" GeneratorBody "}"
         "get" PropName "(" ")" "{" FuncBody "}"
         "set" PropName "(" PropSetParams ")" "{" FuncBody "}"
-    
+     
     PropertyName:
         LiteralPropertyName
         ComputedPropertyName
@@ -542,7 +542,7 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
         }
         •••
     }
-    
+     
     class ColorPoint extends Point {
         constructor(x, y, color) {
             super(x, y);
@@ -550,7 +550,7 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
         }
         •••
     }
-    
+     
     let cp = new ColorPoint(25, 8, 'green');    
 
 Этот код создает следующие объекты:
@@ -596,28 +596,27 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
 Потоки данных между конструкторами классов отличаются от канонического пути 
 наследования в ES5. Под капотом это выглядит примерно так:
 
-    // Instance is allocated here
+    // Экземпляр находится тут
     function Point(x, y) {
-        // Performed before entering this constructor:
+        // Выполняется до выполнения кода конструктора:
         this = Object.create(new.target.prototype);
-    
+     
         this.x = x;
         this.y = y;
     }
     •••
-    
+     
     function ColorPoint(x, y, color) {
-        // Performed before entering this constructor:
+        // Выполняется до выполнения кода конструктора:
         this = uninitialized;
-    
+     
         this = Reflect.construct(Point, [x, y], new.target); // (A)
             // super(x, y);
-    
         this.color = color;
     }
     Object.setPrototypeOf(ColorPoint, Point);
     •••
-    
+     
     let cp = Reflect.construct( // (B)
              ColorPoint, [25, 8, 'green'],
              ColorPoint);
@@ -752,11 +751,11 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
 
     > var a = [];
     > var b = Array.call(a, 3);
-    > a !== b  // a is ignored, b is a new object
+    > a !== b  // a игнорируется, b — новый объект 
     true
-    > b.length // set up correctly
+    > b.length // определилось верно
     3
-    > a.length // unchanged
+    > a.length // неизменно
     0
     
 
@@ -810,7 +809,7 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
 
 #### 4.4 Ссылка на базовые свойства в методах
 
-Следующий ES6 код делает вызов базового метода на строке B.
+Следующий ES6 код вызывает базовый метод со сторокой B в качестве аргумента.
 
     class Point {
         constructor(x, y) {
@@ -821,7 +820,7 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
             return '(' + this.x + ', ' + this.y + ')';
         }
     }
-    
+     
     class ColorPoint extends Point {
         constructor(x, y, color) {
             super(x, y);
@@ -832,7 +831,7 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
                    + ' in ' + this.color;
         }
     }
-    
+     
     let cp = new ColorPoint(25, 8, 'green');
     console.log(cp.toString()); // (25, 8) in green
     
@@ -865,19 +864,19 @@ _итератор_ [[4]](#anchor-4). Это означает, что его со
 
 Давайте реализуем эти шаги в трех различных, но эквивалентных способах:
 
-    // Variation 1: super-method calls in ES5
-    var result = Point.prototype.toString.call(this) // steps 1,2,3
-    
-    // Variation 2: ES5, refactored
-    var superObject = Point.prototype; // step 1
-    var superMethod = superObject.toString; // step 2
-    var result = superMethod.call(this) // step 3
-    
-    // Variation 3: ES6
+    // Вариант 1: вызов супер-метода в ES5
+    var result = Point.prototype.toString.call(this) // шаги 1,2,3
+     
+    // Вариант 2: ES5, после рефакторинга
+    var superObject = Point.prototype; // шаг 1
+    var superMethod = superObject.toString; // шаг 2
+    var result = superMethod.call(this) // шаг 3
+     
+    // Вариант 3: ES6
     var homeObject = ColorPoint.prototype;
-    var superObject = Object.getPrototypeOf(homeObject); // step 1
-    var superMethod = superObject.toString; // step 2
-    var result = superMethod.call(this) // step 3
+    var superObject = Object.getPrototypeOf(homeObject); // шаг 1
+    var superMethod = superObject.toString; // шаг 2
+    var result = superMethod.call(this) // шаг 3
     
 Способ 3 показывает как в ECMAScript 6 обрабатываются вызовы базового класса. 
 Этот подход поддерживается [двумя внутренними *привязками*][10], которые имеют 
@@ -943,30 +942,30 @@ _Состояния_ обеспечивают хранилище для пере
 считается активным. Следующий код демонстриурет как состояния обрабатываются.
 
     /**
-     * Function environments are special, they have a few more
-     * internal variables than other environments.
-     * (`Environment` is not shown here)
+     * Окружение функций — особенное, в нем на несколько
+     * внутренних переменных больше, чем в других окружениях.
+     * (`Окружение` тут показывается)
      */
     class FunctionEnvironment extends Environment {
         constructor(Func) {
-            // [[FunctionObject]] is a function-specific
-            // internal variable
+            // [[FunctionObject]] это специфическая для функций 
+            // внутренняя переменная
             this.__FunctionObject__ = Func;
         }
     }
-    
+     
     /**
-     * Push an environment onto the stack
+     * Добавляем окружение в стек
      */
     function PushEnvironment(env) { ••• }
-    
+     
     /**
-     * Pop the topmost environment from the stack
+     * Удаляем самое верхнее окружение из стека
      */
     function PopEnvironment() { ••• }
-    
+     
     /**
-     * Find topmost function environment on stack
+     * Находим самое верхнее окружение в стеке
      */
     function GetThisEnvironment() { ••• }
     
@@ -977,37 +976,37 @@ _Состояния_ обеспечивают хранилище для пере
 конструктора обрабатываются для функций:
 
     /**
-     * All constructible functions have this own method,
-     * it is called by the `new` operator
+     * У все функции с конструктором есть этот метод,
+     * он вызывается оператором `new`
      */
     AnyFunction.__Construct__ = function (args, newTarget) {
         let Constr = this;
         let kind = Constr.__ConstructorKind__;
-    
+     
         let env = new FunctionEnvironment(Constr);
         env.__NewTarget__ = newTarget;
         if (kind === 'base') {
             env.__thisValue__ = Object.create(newTarget.prototype);
         } else {
-            // While `this` is uninitialized, getting or setting it
-            // throws a `ReferenceError`
+            // Пока `this` не инициализировано, попытка установить или считать её 
+            // приведет к выбрасыванию `ReferenceError`
             env.__thisValue__ = uninitialized;
         }
-    
+        
         PushEnvironment(env);
         let result = Constr(...args);
         PopEnvironment();
-    
-        // Let’s pretend there is a way to tell whether `result`
-        // was explicitly returned or not
+     
+        // Давайте представим, что есть способ сказать был ли `result`
+        // возвращен в явном виде или нет
         if (WasExplicitlyReturned(result)) {
             if (isObject(result)) {
                 return result;
             }
-            // Explicit return of a primitive
+            // Явно возвращаем примитив
             if (kind === 'base') {
-                // Base constructors must be backwards compatible
-                return env.__thisValue__; // always initialized!
+                // Конструкторы должны обладать обратной совместимостью
+                return env.__thisValue__; // всегда инициализирована!
             }
             throw new TypeError();
         }
@@ -1025,14 +1024,14 @@ _Состояния_ обеспечивают хранилище для пере
 ([ES6 спецификация, Секция. 12.3.5.1][12]).
 
     /**
-     * Handle super-constructor calls
+     * Обработка вызовов супер-конструктора
      */
     function super(...args) {
         let env = GetThisEnvironment();
         let newTarget = env.__NewTarget__;
         let activeFunc = env.__FunctionObject__;
         let superConstructor = Object.getPrototypeOf(activeFunc);
-    
+     
         env.__thisValue__ = superConstructor
                             .__Construct__(args, newTarget);
     }
@@ -1061,7 +1060,7 @@ _Состояния_ обеспечивают хранилище для пере
     }
     let result1 = new MyArray1().map(x => x);
     console.log(result1 instanceof MyArray1); // true
-    
+     
     class MyArray2 extends Array {
         static get [Symbol.species]() { // (A)
             return Array;
